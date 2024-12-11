@@ -1,4 +1,3 @@
-using System;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
@@ -10,7 +9,7 @@ namespace API.Data;
 
 public class UserRepository(DataContext context, IMapper mapper) : IUserRepository
 {
-    public async Task<MemberDto?> GetMemberAsynk(string username)
+    public async Task<MemberDto?> GetMemberAsync(string username)
     {
         return await context.Users
         .Where(x => x.UserName == username)
@@ -18,33 +17,33 @@ public class UserRepository(DataContext context, IMapper mapper) : IUserReposito
         .SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<MemberDto>?> GetMembersAsynk()
+    public async Task<IEnumerable<MemberDto>?> GetMembersAsync()
     {
         return await context.Users
         .ProjectTo<MemberDto>(mapper.ConfigurationProvider)
         .ToListAsync();
     }
 
-    public async Task<AppUser?> GetUserByIdAsynk(int id)
+    public async Task<AppUser?> GetUserByIdAsync(int id)
     {
         return await context.Users.FindAsync(id);
     }
 
-    public async Task<AppUser?> GetUserByUsernameAsynk(string username)
+    public async Task<AppUser?> GetUserByUsernameAsync(string username)
     {
         return await context.Users
         .Include(x => x.Photos)
         .SingleOrDefaultAsync(x => x.UserName == username);
     }
 
-    public async Task<IEnumerable<AppUser>> GetUsersAsynk()
+    public async Task<IEnumerable<AppUser>> GetUsersAsync()
     {
         return await context.Users
         .Include(x => x.Photos)
         .ToListAsync();
     }
 
-    public async Task<bool> SaveAllAsynk()
+    public async Task<bool> SaveAllAsync()
     {
         return await context.SaveChangesAsync() > 0;
     }
