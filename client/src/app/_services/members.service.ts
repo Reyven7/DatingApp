@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Member } from '../_models/member';
@@ -7,6 +7,10 @@ import { PaginatedResult } from '../_models/pagination';
 import { of } from 'rxjs';
 import { UserParams } from '../_models/userParams';
 import { AccountService } from './account.service';
+import {
+  setPaginationHeaders,
+  setPaginationResponce,
+} from './paginationHelper';
 
 @Injectable({
   providedIn: 'root',
@@ -29,9 +33,9 @@ export class MembersService {
       Object.values(this.userParams()).join('-')
     );
 
-    if (responce) return this.setPaginationResponce(responce);
+    if (responce) return setPaginationResponce(responce, this.paginatedResult);
 
-    let params = this.setPaginationHeaders(
+    let params = setPaginationHeaders(
       this.userParams().pageNumber,
       this.userParams().pageSize
     );
@@ -45,31 +49,13 @@ export class MembersService {
       .get<Member[]>(this.baseUrl + 'users', { observe: 'response', params })
       .subscribe({
         next: (responce) => {
-          this.setPaginationResponce(responce);
+          setPaginationResponce(responce, this.paginatedResult);
           this.memberCache.set(
             Object.values(this.userParams()).join('-'),
             responce
           );
         },
       });
-  }
-
-  private setPaginationResponce(responce: HttpResponse<Member[]>) {
-    this.paginatedResult.set({
-      items: responce.body as Member[],
-      pagination: JSON.parse(responce.headers.get('Pagination')!),
-    });
-  }
-
-  private setPaginationHeaders(pageNumber: number, pageSize: number) {
-    let params = new HttpParams();
-
-    if (pageNumber && pageSize) {
-      params = params.append('pageNumber', pageNumber);
-      params = params.append('pageSize', pageSize);
-    }
-
-    return params;
   }
 
   getMember(username: string) {
